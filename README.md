@@ -1,102 +1,254 @@
-# Timer Dial for Stream Deck+
+# Timer Dial for Stream Deck +
 
-A countdown timer that lives on **one dial** of a Stream Deck+. Turn to set a time, press to start, hold to reset. The touch strip shows the countdown, and a built-in alarm sound plays when time runs out.
+A free countdown timer for the Elgato Stream Deck + that lives on a single dial. Turn it to set the
+time and press to start. The countdown shows on the touch strip, and an alarm sounds when time is
+up.
 
-![icon](tools/marketplace-icon.svg)
+Everything happens on the dial and its strip of touch screen: no extra keys, no account, and
+nothing to set up before you use it.
 
-## Install
+## Features
 
-Double-click `com.jere.timerdial.streamDeckPlugin`. Stream Deck installs it, and **Timer Dial** shows up in the action list. Drag it onto a dial.
+- **One dial does everything**: set, start, pause, reset and stop the alarm without any extra keys
+- **Smart steps**: 5 seconds at a time under a minute, 30 seconds up to 10 minutes, then whole
+  minutes, so every click of the dial moves the time by a useful amount
+- **Push and turn** to jump in 5-minute steps
+- **Change a running timer**: turn to add or take off time without stopping it
+- **Nine built-in alarm sounds**, from a quiet pulse to an old-school alarm clock, or your own WAV
+  file
+- **Matched loudness**: every built-in sound plays at about the same volume, so switching sounds
+  never blasts you
+- **Respects your touch strip background**: the timer draws on top of it, and only the alarm
+  flash covers it
+- **Keeps counting in the background**: switch pages or close a folder and the alarm still goes
+  off
+- **Survives restarts**: a running timer carries on after the Stream Deck app restarts
+- **As many timers as you have dials**, each with its own sound and settings
+- **Two control styles**: Streamlined (the default) or Classic, where you turn to choose an amount
+  and press to add it
 
-You need Stream Deck 7.1 or newer, on Windows 10+ or macOS 12+.
+## Requirements
+
+- A Stream Deck +. Timer Dial is a dial control, so it doesn't work on keys.
+- Stream Deck app 7.1 or newer, on Windows 10+ or macOS 12+
+
+## Installation
+
+1. Download `com.jere.timerdial.streamDeckPlugin` from the
+   [latest release](../../releases/latest).
+2. Double-click the file. The Stream Deck app installs it and adds a **Timer Dial** category to
+   the actions list.
+3. Drag **Timer Dial** onto a dial. It starts at 5:00, ready to go.
+
+The [changelog](CHANGELOG.md) lists what's new in each version.
 
 ## Controls
 
-**Streamlined** (the default, chosen in the settings panel):
+### Streamlined (default)
 
 | Gesture | What it does |
 |---|---|
-| Turn | Set the time. While running, add or remove time. |
-| Push + turn | Jump in 5-minute steps. |
-| Press | Start / pause. |
-| Hold (½ s) | Reset to the time you started with. Hold again for your *Start time*. |
-| Tap the strip | Start / pause. A long touch resets. |
-| While ringing | Any press, tap or turn stops the alarm. |
+| **Turn** | Set the time. While running, add or take off time. |
+| **Push and turn** | Jump in 5-minute steps |
+| **Press** | Start / pause |
+| **Hold (half a second)** | Reset to the time you started with. Hold again for your **Start time**. |
+| **Tap the strip** | Start / pause |
+| **Hold the strip** | Reset |
 
-Turning uses "smart" steps: 5 s under a minute, 30 s up to 10 min, 1 min up to an hour, then 5 min. Each detent moves the time by a useful amount.
+The reset happens while you're still holding the dial, so you know it worked before you let go.
+Turning a running timer all the way down to zero cancels it rather than setting off the alarm.
 
-**Classic** (your original design): turn to choose an amount, press to add it (it works while the timer runs too), hold to reset, tap the strip to start/pause.
+### Classic
 
-## Settings panel
+| Gesture | What it does |
+|---|---|
+| **Turn** | Choose how much a press adds (shown at the bottom of the strip) |
+| **Press** | Add that amount. Works while the timer is running too. |
+| **Hold (half a second)** | Reset |
+| **Tap the strip** | Start / pause |
+| **Hold the strip** | Reset |
 
-- **Controls**: Streamlined or Classic.
-- **Start time**: what the dial shows after a reset. Accepts `5`, `4:30`, `90s`, `1h30m`, `1:15:00`. Blank means 0:00.
-- **Alarm sound**: 9 built-in sounds, from *Soft Pulse* (quiet) to *Alarm Clock* (urgent), or your own WAV file.
-- **Volume** and **Ring for** (once, 10 s to 2 min, or until stopped).
-- **Preview**: Play/Stop, so you can audition sounds.
+The amount stays set after you press, so pressing three times with **+5:00** adds 15 minutes.
 
-The built-in sounds are synthesised from scratch by `tools/make_sounds.py` and released as public domain (CC0). There's no attribution to track and no licence problem if you ever publish the plugin.
+### When the alarm goes off
 
-## Build it yourself
+Any press, tap or turn stops it, and the timer goes back to the time you started with, so a
+single press runs it again. If you stop it by turning, the rest of that turn is ignored so the
+time doesn't change by accident.
 
-You need [Node.js 24+](https://nodejs.org/) and, if you want to regenerate the sounds, Python 3 with `numpy` and `scipy`.
+### The touch strip
 
-```bash
-npm install
-npm test              # unit tests for the timer logic (fast, no hardware)
-npm run e2e           # builds, then drives the real plugin with a fake Stream Deck
-npm run validate      # Elgato's manifest/layout checker
-npm run pack          # -> dist/com.jere.timerdial.streamDeckPlugin
+| Part | Shows |
+|---|---|
+| Top left | The timer's name. Use the **Title** box in the Stream Deck app to rename it, for example to "Tea". |
+| Top right | **READY**, **RUNNING**, **PAUSED** or **TIME'S UP** |
+| Middle | The time left |
+| Bottom | A hint for what the dial does next, then a progress bar |
+
+The bar is green while running and turns orange for the last 10% (or the last 10 seconds). It's
+amber while paused. When time is up, the strip flashes red while the alarm plays, then stays dark
+red and counts how long ago the timer finished (for example **+1:23**) until you stop it.
+
+### Settings
+
+| Setting | What it does |
+|---|---|
+| **Controls** | Streamlined or Classic |
+| **Start time** | What the dial shows after a reset. Accepts `5` (minutes), `4:30`, `90s`, `1h30m` or `1:15:00`. Leave it blank for 0:00. |
+| **Alarm sound** | One of the built-in sounds, or **Custom WAV file** |
+| **Volume** | 0 to 100 (default 80) |
+| **Ring for** | Play once, 10 seconds, 30 seconds (default), 1 minute, 2 minutes, or until stopped (up to 10 minutes) |
+| **Preview** | Play and stop the chosen sound |
+
+### Alarm sounds
+
+| Gentle | Classic | Lively | Urgent |
+|---|---|---|---|
+| Soft Pulse (quiet) | Classic Beeper | Rise & Shine | Alarm Clock |
+| Gentle Chime | Digital Watch | Retro Arcade | |
+| Sonar Ping | Desk Bell | | |
+
+A custom sound is embedded in the action, so it goes with the profile when you export it.
+
+## Troubleshooting
+
+**The alarm makes no sound.**
+Press **Play** in the settings to check. If you hear nothing, check that **Volume** isn't at 0
+and that your computer's sound is on and going to the right speakers. The plugin plays sound
+through Windows' built-in sound player (via PowerShell) or macOS's `afplay`, both on the
+default output device. If a custom sound file has been moved or deleted, Classic Beeper plays
+instead.
+
+**The volume slider doesn't change my custom sound (Windows).**
+Windows' built-in player has no volume control, so the plugin makes a quieter copy of the file.
+That only works for 16-bit PCM WAV files, which is the most common kind. Other WAV files play at
+full volume. To convert one, open it in a free audio editor such as Audacity and export it as
+"WAV (Microsoft), signed 16-bit PCM".
+
+**A timer I deleted still rang.**
+Stream Deck tells plugins the same thing when you delete a control as when you switch pages, so
+the plugin can't tell the two apart. A timer deleted while it's running rings once, for no longer
+than its **Ring for** setting. Reset a timer before deleting it.
+
+**A timer didn't ring after the Stream Deck app restarted.**
+A running timer picks up again once its page is on screen. If it finished more than 2 minutes
+before that, it resets quietly instead of ringing.
+
+**Something else.**
+The plugin writes logs to the `logs` folder inside the plugin's folder:
+
+- Windows: `%appdata%\Elgato\StreamDeck\Plugins\com.jere.timerdial.sdPlugin\logs`
+- macOS: `~/Library/Application Support/com.elgato.StreamDeck/Plugins/com.jere.timerdial.sdPlugin/logs`
+
+Please attach the latest log file if you open an issue.
+
+## Building from source
+
+You need Node.js 24 or newer and the Stream Deck app 7.1 or newer. The Elgato CLI comes with the
+project's dependencies, so there's nothing else to install. To regenerate the alarm sounds you
+also need Python 3 with `numpy` and `scipy` (on Windows, if `python3` isn't found, run
+`py tools/make_sounds.py` instead). Clone or download this repository, then from its folder:
+
+```
+npm install                                       # project dependencies, including the Elgato CLI
+npm test                                          # unit tests for the timer logic (no deck needed)
+npm run e2e                                       # build, then drive the plugin with a fake Stream Deck
+npm run typecheck                                 # check the TypeScript types
+npm run validate                                  # Elgato's manifest and layout checks
+npm run build                                     # build the plugin into the .sdPlugin folder
+npx streamdeck link com.jere.timerdial.sdPlugin   # install your build in the Stream Deck app
+npm run watch                                     # rebuild and restart the plugin on every save
+npx streamdeck dev                                # settings-page debugger on http://localhost:23654
+npm run sounds                                    # regenerate the alarm sounds (Python, numpy, scipy)
+npm run pack                                      # make dist/com.jere.timerdial.streamDeckPlugin
 ```
 
-**Live development loop:**
+Uninstall the released version before running `streamdeck link`, because both use the same ID.
 
-```bash
-npm install -g @elgato/cli
-streamdeck dev                                  # enable developer mode
-streamdeck link com.jere.timerdial.sdPlugin     # symlink into Stream Deck's plugins folder
-npm run watch                                   # rebuild + restart the plugin on every save
-```
+### Adding an alarm sound
 
-To debug the settings panel, open http://localhost:23654/ while the panel is visible in Stream Deck. Plugin logs go to `com.jere.timerdial.sdPlugin/logs/`.
+1. Write a function in `tools/make_sounds.py` that returns the sound as a numpy array, and add it
+   to `CATALOGUE` with a name and a target loudness.
+2. Run `npm run sounds`.
+3. Add its ID to `BUILT_IN_SOUNDS` in `src/audio/sounds.ts`, and an `<option>` for it in
+   `com.jere.timerdial.sdPlugin/ui/timer-dial.html`.
 
-## How it's put together
+### Project structure
 
 ```
 src/
-  timer/timer.ts        Pure timer logic: state in, new state out. No Stream Deck, no clock.
-  render.ts             Timer state -> what the touch strip shows.
-  actions/timer-dial.ts Stream Deck glue: dial/touch events, long-press, ticker, alarm.
-  audio/player.ts       Plays sound with OS tools (afplay on Mac, PowerShell on Windows).
-  audio/wav.ts          Volume scaling for Windows (its built-in player has no volume knob).
-  store.ts              Remembers running timers across a Stream Deck restart.
+  timer/timer.ts        The timer rules. No Stream Deck code and no clock, so it can be tested on its own.
+  render.ts             Turns a timer's state into what the touch strip shows.
+  actions/timer-dial.ts The dial control: gestures, the long press, the shared clock and the alarm.
+  audio/
+    player.ts           Plays sound with the operating system's own tools.
+    sounds.ts           The list of built-in sounds and which file to play.
+    wav.ts              Makes quieter copies of WAV files for Windows.
+  store.ts              Remembers running timers across a restart.
+  plugin.ts             Registers the control.
 com.jere.timerdial.sdPlugin/
-  manifest.json         Plugin metadata Stream Deck reads.
-  layouts/timer-dial.json  Touch-strip layout (200 x 100 px).
-  ui/timer-dial.html    Settings panel (property inspector).
-  sounds/               The alarm WAVs.
-test/                   Unit tests + the fake Stream Deck end-to-end test.
-tools/make_sounds.py    Sound synthesiser.
+  manifest.json         The control, its icons and what each gesture does.
+  layouts/              The touch strip layout (200 x 100 px).
+  imgs/                 Icons for the action list and the plugin.
+  sounds/               The alarm sounds.
+  ui/                   The settings page, using Elgato's sdpi-components.
+test/                   Tests for the timer rules and WAV scaling, plus an end-to-end test against
+                        a fake Stream Deck.
+tools/make_sounds.py    Generates the alarm sounds.
 ```
 
-### Practices worth copying
+### How it works
 
-- **Keep logic pure, keep glue thin.** All the timer rules live in `timer.ts` as plain functions that take `now` as an argument. You can test them in milliseconds without hardware or waiting, and the Stream Deck code only connects events to those functions.
-- **Store an end time, not a counter.** A countdown that subtracts 1 every second drifts, and it stops if the PC sleeps. Storing *when it ends* means the timer is always right whenever you look.
-- **Only send what changed.** The internal clock ticks 10 times a second, but the plugin only redraws strip items whose content changed: about once a second, well under Elgato's 10-updates-per-second limit.
-- **Don't share mutable state with the UI.** The settings panel writes the whole action-settings object at once. Countdown state therefore lives in *global* settings, so the panel can't overwrite it with a stale copy.
-- **Pass data via environment variables, not string-building.** The Windows player hands the file path to PowerShell in an environment variable, so a strange file name can't break or inject into the command.
-- **Fail safe.** A long-press reset fires while you're still holding the dial, so you know it happened. Spinning a running timer down to zero cancels it instead of setting off the alarm. Every alarm has a hard time limit, even if the plugin crashes.
-- **Use the platform's features.** The timer's label is Stream Deck's own *Title* field. Trigger descriptions show the controls inside the Stream Deck app. A custom sound is embedded as a *resource*, so it travels with exported profiles.
+- **Rules with no Stream Deck code.** Every timer rule is a plain function that takes the current
+  state and the time, and returns a new state. Tests can skip ahead an hour just by passing a
+  bigger number, with no hardware and no waiting.
+- **An end time, not a counter.** Subtracting a second every second drifts, and stops while the
+  computer sleeps. The plugin stores when the timer will finish, which is right whenever you look.
+- **One clock for every timer.** A single ticker serves all the dials, and only runs while a
+  timer is counting or ringing. The strip is only sent the parts that changed, about once a
+  second, well under Elgato's limit of 10 updates a second.
+- **A home-made long press.** Dials have no built-in long-press event, so the plugin times the
+  press itself. Letting go after a hold, or after a push-and-turn, doesn't count as a press.
+- **Sound without add-ons.** Node.js has no audio support, and Stream Deck plugins can't load
+  native add-ons, so the plugin uses the tools that come with the operating system: `afplay` on
+  macOS and PowerShell's `System.Media.SoundPlayer` on Windows. The file name is passed in an
+  environment variable rather than pasted into the command, so an unusual name can't break it.
+- **Fail safe.** Every alarm has a hard time limit, and on Windows the sound loop checks that the
+  plugin is still running, so an alarm can't keep ringing if the Stream Deck app closes.
+- **Running timers kept apart from settings.** The settings page saves the whole settings object
+  at once, so running timers are stored separately, in the plugin's global settings, where the
+  page can't overwrite them.
+- **Sounds made from maths.** The alarm sounds are synthesised from sine waves and envelopes by
+  `tools/make_sounds.py`, then matched for loudness using the same measure (LUFS) that streaming
+  services use.
 
-## Add your own built-in sound
+## Contributing
 
-1. Write a function in `tools/make_sounds.py` that returns a numpy array, and add it to `CATALOGUE`.
-2. Run `npm run sounds`.
-3. Add the id to `BUILT_IN_SOUNDS` in `src/audio/sounds.ts`, and an `<option>` in `ui/timer-dial.html`.
+Bug reports, ideas and pull requests are welcome. By contributing, you agree that your changes are
+released under the same licence as the rest of the project.
 
-## Known limitations
+## Licence
 
-- Stream Deck sends the same "disappeared" event whether you switch pages or delete an action. If you delete a timer **while it's running**, it still rings once, for up to your *Ring for* length. Reset it before deleting.
-- Custom sounds must be WAV. On Windows, the volume slider only affects 16-bit PCM WAVs (all the built-in ones are). Other WAVs play at full volume.
-- After a Stream Deck restart, a running timer resumes once its page is shown. If it ran out more than 2 minutes earlier, it resets quietly instead of ringing.
+Timer Dial is free, and meant to stay that way. It is released under the
+[PolyForm Noncommercial License 1.0.0](LICENSE.md). In plain words:
+
+- **You can** use it, copy it, change it and share it for free, for any noncommercial purpose:
+  at home, for a hobby, or in a school, charity or other noncommercial organisation.
+- **You can't** sell it, charge for changed versions of it, or use it to make money.
+- If you share it or a changed version, include the licence and the copyright notice.
+
+This is a summary, and the licence text is what counts. Because it doesn't allow commercial use,
+the project is "source-available" rather than "open source" by the Open Source Initiative's
+definition.
+
+The alarm sounds are the exception. They are released into the public domain under
+[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/), so you can use them for anything,
+commercial or not, without credit.
+
+## Credits
+
+The settings page uses Elgato's [sdpi-components](https://sdpi-components.dev), used under the
+MIT licence (see `com.jere.timerdial.sdPlugin/ui/sdpi-components.LICENSE.md`).
+
+This is an independent project. It is not affiliated with or endorsed by Elgato. Stream Deck is a
+trademark of its owner.

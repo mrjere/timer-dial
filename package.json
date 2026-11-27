@@ -2,7 +2,8 @@
 	"name": "timer-dial",
 	"version": "1.0.1",
 	"private": true,
-	"description": "A one-dial countdown timer for the Stream Deck+",
+	"description": "A countdown timer on a single Stream Deck + dial, with built-in alarm sounds.",
+	"license": "PolyForm-Noncommercial-1.0.0",
 	"type": "module",
 	"scripts": {
 		"build": "rollup -c",
