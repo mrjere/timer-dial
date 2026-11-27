@@ -1,0 +1,37 @@
+{
+	"name": "timer-dial",
+	"version": "1.0.0",
+	"private": true,
+	"description": "A one-dial countdown timer for the Stream Deck+",
+	"type": "module",
+	"scripts": {
+		"build": "rollup -c",
+		"watch": "rollup -c -w --watch.onEnd=\"streamdeck restart com.jere.timerdial\"",
+		"test": "node --experimental-strip-types --no-warnings --test \"test/*.test.ts\"",
+		"e2e": "npm run build && node test/fake-stream-deck.mjs",
+		"typecheck": "tsc --noEmit",
+		"validate": "streamdeck validate com.jere.timerdial.sdPlugin --no-update-check",
+		"pack": "npm run build && streamdeck pack com.jere.timerdial.sdPlugin --output dist --force --no-update-check",
+		"sounds": "python3 tools/make_sounds.py"
+	},
+	"dependencies": {
+		"@elgato/streamdeck": "^3.0.6"
+	},
+	"devDependencies": {
+		"@elgato/cli": "^1.10.5",
+		"@elgato/schemas": "^0.6.0",
+		"@rollup/plugin-commonjs": "^29.0.3",
+		"@rollup/plugin-node-resolve": "^16.0.3",
+		"@rollup/plugin-terser": "^1.0.2",
+		"@rollup/plugin-typescript": "^12.3.1",
+		"@tsconfig/node24": "^24.0.6",
+		"@types/node": "^24.19.4",
+		"rollup": "^4.68.8",
+		"tslib": "^2.9.1",
+		"typescript": "^5.9.3",
+		"ws": "^8.23.0"
+	},
+	"engines": {
+		"node": ">=24"
+	}
+}

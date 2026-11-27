@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Timer Dial Settings</title>
+		<!--
+			Loaded locally (not from the CDN) so the panel works offline and never
+			changes underneath you - Elgato's recommended practice.
+			Component docs: https://sdpi-components.dev/docs/components
+		-->
+		<script src="sdpi-components.js"></script>
+		<style>
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+			}
+			.note {
+				color: #9a9a9a;
+				font-size: 9pt;
+				line-height: 1.35;
+				margin: 2px 0 0;
+			}
+			.note.ok {
+				color: #7fcf8f;
+			}
+			.note.bad {
+				color: #ff8a80;
+			}
+			.buttons {
+				display: flex;
+				gap: 6px;
+			}
+			.buttons sdpi-button {
+				flex: 1;
+			}
+			details.help {
+				margin: 12px 8px 8px;
+				color: #b8b8b8;
+				font-size: 9pt;
+			}
+			details.help summary {
+				cursor: pointer;
+				color: #d0d0d0;
+				margin-bottom: 6px;
+			}
+			details.help table {
+				border-collapse: collapse;
+				width: 100%;
+			}
+			details.help td {
+				padding: 3px 4px;
+				vertical-align: top;
+				border-top: 1px solid #3a3a3a;
+			}
+			details.help td:first-child {
+				white-space: nowrap;
+				color: #e6e6e6;
+				width: 38%;
+			}
+			[hidden] {
+				display: none !important;
+			}
+		</style>
+	</head>
+
+	<body>
+		<sdpi-item label="Controls">
+			<sdpi-select setting="scheme" default="streamlined">
+				<option value="streamlined">Streamlined (recommended)</option>
+				<option value="classic">Classic: turn an amount, press to add</option>
+			</sdpi-select>
+		</sdpi-item>
+
+		<sdpi-item label="Start time">
+			<sdpi-textfield id="startTime" setting="startTime" placeholder="e.g. 5:00, 90s, 1h30m"></sdpi-textfield>
+		</sdpi-item>
+		<sdpi-item>
+			<p id="startTimeNote" class="note">What the dial shows when it's reset. Leave blank for 0:00.</p>
+		</sdpi-item>
+
+		<sdpi-item label="Alarm sound">
+			<sdpi-select id="sound" setting="sound" default="classic-beeper">
+				<optgroup label="Gentle">
+					<option value="soft-pulse">Soft Pulse (quiet)</option>
+					<option value="gentle-chime">Gentle Chime</option>
+					<option value="sonar">Sonar Ping</option>
+				</optgroup>
+				<optgroup label="Classic">
+					<option value="classic-beeper">Classic Beeper</option>
+					<option value="digital-watch">Digital Watch</option>
+					<option value="desk-bell">Desk Bell</option>
+				</optgroup>
+				<optgroup label="Lively">
+					<option value="rise-and-shine">Rise &amp; Shine</option>
+					<option value="retro-arcade">Retro Arcade</option>
+				</optgroup>
+				<optgroup label="Urgent">
+					<option value="alarm-clock">Alarm Clock</option>
+				</optgroup>
+				<optgroup label="Your own">
+					<option value="custom">Custom WAV file…</option>
+				</optgroup>
+			</sdpi-select>
+		</sdpi-item>
+
+		<sdpi-item id="customRow" label="Sound file" hidden>
+			<sdpi-file id="customSound" setting="customSound" accept=".wav"></sdpi-file>
+		</sdpi-item>
+		<sdpi-item id="customNote" hidden>
+			<p class="note">WAV files play on both Windows and Mac. The file is embedded when you export the profile.</p>
+		</sdpi-item>
+
+		<sdpi-item label="Volume">
+			<sdpi-range id="volume" setting="volume" min="0" max="100" step="5" default="80" showlabels>
+				<span slot="min">0</span>
+				<span slot="max">100</span>
+			</sdpi-range>
+		</sdpi-item>
+
+		<sdpi-item label="Ring for">
+			<sdpi-select setting="alarmLength" default="30">
+				<option value="once">Play once</option>
+				<option value="10">10 seconds</option>
+				<option value="30">30 seconds</option>
+				<option value="60">1 minute</option>
+				<option value="120">2 minutes</option>
+				<option value="until">Until stopped (max 10 min)</option>
+			</sdpi-select>
+		</sdpi-item>
+
+		<sdpi-item label="Preview">
+			<div class="buttons">
+				<sdpi-button id="preview">▶ Play</sdpi-button>
+				<sdpi-button id="stop">■ Stop</sdpi-button>
+			</div>
+		</sdpi-item>
+
+		<details class="help" open>
+			<summary>How to use the dial</summary>
+			<table id="helpStreamlined">
+				<tr><td>Turn</td><td>Set the time. While running, adds or removes time.</td></tr>
+				<tr><td>Push + turn</td><td>Jump in 5-minute steps.</td></tr>
+				<tr><td>Press</td><td>Start / pause.</td></tr>
+				<tr><td>Hold (½ s)</td><td>Reset to the time you started with, then to your start time.</td></tr>
+				<tr><td>Tap screen</td><td>Start / pause. Long-touch resets.</td></tr>
+				<tr><td>Alarm ringing</td><td>Any press, tap or turn stops it.</td></tr>
+			</table>
+			<table id="helpClassic" hidden>
+				<tr><td>Turn</td><td>Choose how much a press adds (shown at the bottom).</td></tr>
+				<tr><td>Press</td><td>Add that amount — works while running too.</td></tr>
+				<tr><td>Hold (½ s)</td><td>Reset.</td></tr>
+				<tr><td>Tap screen</td><td>Start / pause. Long-touch resets.</td></tr>
+				<tr><td>Alarm ringing</td><td>Any press, tap or turn stops it.</td></tr>
+			</table>
+		</details>
+
+		<script>
+			const { streamDeckClient } = SDPIComponents;
+			const $ = (id) => document.getElementById(id);
+
+			// --- Show the custom-file picker only when "Custom" is chosen ---------
+			const sound = $("sound");
+			const syncCustom = () => {
+				const isCustom = sound.value === "custom";
+				$("customRow").hidden = !isCustom;
+				$("customNote").hidden = !isCustom;
+			};
+			sound.addEventListener("valuechange", syncCustom);
+
+			// --- Swap the cheat-sheet to match the chosen control scheme ----------
+			const scheme = document.querySelector('sdpi-select[setting="scheme"]');
+			const syncHelp = () => {
+				const classic = scheme.value === "classic";
+				$("helpClassic").hidden = !classic;
+				$("helpStreamlined").hidden = classic;
+			};
+			scheme.addEventListener("valuechange", syncHelp);
+
+			// --- Live feedback on the start time ---------------------------------
+			// Mirrors parseDuration() in src/timer/timer.ts so you see how your
+			// text will be understood before you leave the box.
+			function parseDuration(text) {
+				const t = (text || "").trim().toLowerCase();
+				if (!t) return 0;
+				if (/^\d+(\.\d+)?$/.test(t)) return Math.round(parseFloat(t) * 60);
+				let m = /^(\d+):(\d{1,2})(?::(\d{1,2}))?$/.exec(t);
+				if (m) return m[3] === undefined ? +m[1] * 60 + +m[2] : +m[1] * 3600 + +m[2] * 60 + +m[3];
+				m = /^(?:(\d+)\s*h)?\s*(?:(\d+)\s*m(?:in)?)?\s*(?:(\d+)\s*s(?:ec)?)?$/.exec(t);
+				if (m && (m[1] || m[2] || m[3])) return (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0);
+				return undefined;
+			}
+			function fmt(sec) {
+				sec = Math.min(sec, 86400);
+				const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+				const ss = String(s).padStart(2, "0");
+				return h ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${m}:${ss}`;
+			}
+			const startTime = $("startTime");
+			const note = $("startTimeNote");
+			const syncStartNote = () => {
+				const value = startTime.value;
+				const sec = parseDuration(value);
+				if (value === undefined) return;
+				if (sec === undefined) {
+					note.textContent = `Not sure what "${value}" means; using 5:00. Try 5:00, 90s or 1h30m.`;
+					note.className = "note bad";
+				} else {
+					note.textContent = sec === 0 ? "Starts at 0:00 (turn the dial to set a time)." : `Starts at ${fmt(sec)}.`;
+					note.className = "note ok";
+				}
+			};
+			startTime.addEventListener("valuechange", syncStartNote);
+
+			// A brand-new action has no settings yet. Write the start time default
+			// so the box shows it (the plugin applies the same defaults itself).
+			streamDeckClient.didReceiveSettings.subscribe((ev) => {
+				const settings = ev?.payload?.settings ?? {};
+				if (settings.startTime === undefined) setTimeout(() => (startTime.value = "5:00"), 0);
+			});
+
+			// --- Preview buttons talk to the plugin directly ----------------------
+			// We send the values currently on screen, so the preview matches what you
+			// see even if the settings save (debounced by ~250 ms) hasn't happened yet.
+			$("preview").addEventListener("click", () => {
+				streamDeckClient.send("sendToPlugin", {
+					event: "preview",
+					sound: sound.value || "classic-beeper",
+					customSound: $("customSound").value || "",
+					volume: typeof $("volume").value === "number" ? $("volume").value : 80,
+				});
+			});
+			$("stop").addEventListener("click", () => streamDeckClient.send("sendToPlugin", { event: "stop" }));
+		</script>
+	</body>
+</html>

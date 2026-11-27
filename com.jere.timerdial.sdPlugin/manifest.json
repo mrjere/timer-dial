@@ -1,0 +1,57 @@
+{
+	"$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+	"Name": "Timer Dial",
+	"Version": "1.0.0.0",
+	"Author": "Jere",
+	"Description": "A countdown timer that lives entirely on one Stream Deck+ dial: turn to set, press to start or pause, hold to reset, with a choice of built-in alarm sounds.",
+	"Category": "Timer Dial",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"Icon": "imgs/plugin/marketplace",
+	"CodePath": "bin/plugin.js",
+	"SDKVersion": 3,
+	"Software": {
+		"MinimumVersion": "7.1"
+	},
+	"OS": [
+		{
+			"Platform": "mac",
+			"MinimumVersion": "12"
+		},
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"Nodejs": {
+		"Version": "24",
+		"Debug": "enabled"
+	},
+	"UUID": "com.jere.timerdial",
+	"Actions": [
+		{
+			"Name": "Timer Dial",
+			"UUID": "com.jere.timerdial.timer",
+			"Icon": "imgs/actions/timer/icon",
+			"Tooltip": "Countdown timer on a single dial. Turn to set, press to start/pause, hold to reset.",
+			"PropertyInspectorPath": "ui/timer-dial.html",
+			"Controllers": [
+				"Encoder"
+			],
+			"Encoder": {
+				"layout": "layouts/timer-dial.json",
+				"TriggerDescription": {
+					"Rotate": "Set time (push + turn: ±5 min)",
+					"Push": "Start / pause (hold: reset)",
+					"Touch": "Start / pause",
+					"LongTouch": "Reset"
+				}
+			},
+			"States": [
+				{
+					"Image": "imgs/actions/timer/key"
+				}
+			],
+			"SupportedInMultiActions": false
+		}
+	]
+}

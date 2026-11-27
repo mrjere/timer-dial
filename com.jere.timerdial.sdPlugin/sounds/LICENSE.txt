@@ -1,0 +1,12 @@
+Timer Dial alarm sounds
+=======================
+
+All WAV files in this folder were synthesised from scratch by
+tools/make_sounds.py (sine waves, envelopes and filtered noise). They contain
+no third-party recordings or samples.
+
+They are dedicated to the public domain under CC0 1.0 Universal:
+https://creativecommons.org/publicdomain/zero/1.0/
+
+You may copy, modify, distribute and use them, including commercially,
+without asking permission or giving credit.
