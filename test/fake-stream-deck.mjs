@@ -128,10 +128,11 @@ try {
 	await sd.start();
 	sd.appear({ startTime: "0:03", alarmLength: "once", sound: "desk-bell" });
 	await sd.waitFor(() => sd.text("time") === "0:03" && sd.text("status") === "READY", "initial draw");
+	assert.equal(sd.strip.bg?.enabled, false, "background panel must be hidden so the user's strip background shows");
 	// On dials, the SDK's setTitle() is sent as feedback for the layout's "title" item.
 	assert.ok(sd.received.some((m) => m.event === "setFeedback" && m.payload.title === "Timer"));
 	assert.ok(sd.received.some((m) => m.event === "setTriggerDescription" && /Set time/.test(m.payload.rotate)));
-	ok("draws 0:03 READY, sets title and trigger descriptions");
+	ok("draws 0:03 READY with a transparent background, sets title and trigger descriptions");
 
 	sd.rotate(1);
 	await sd.waitFor(() => sd.text("time") === "0:05", "snap up to 0:05");
@@ -169,9 +170,9 @@ try {
 	sd.tap();
 	await sd.waitFor(() => sd.text("status") === "RUNNING", "resumed");
 	await sd.waitFor(() => sd.text("status") === "TIME'S UP", "alarm", 6000);
-	const bg1 = sd.strip.bg.background;
-	await sd.waitFor(() => sd.strip.bg.background !== bg1, "background flashes");
-	ok("alarm fires: TIME'S UP with flashing background");
+	const bg1 = sd.strip.bg.enabled;
+	await sd.waitFor(() => sd.strip.bg.enabled !== bg1, "red panel flashes on/off");
+	ok("alarm fires: TIME'S UP with the red panel flashing over your background");
 
 	sd.actionEvent("dialDown");
 	await sd.waitFor(() => sd.text("status") === "READY", "dismissed on press-down");
@@ -179,7 +180,8 @@ try {
 	await sleep(150);
 	assert.equal(sd.text("status"), "READY", "the release after dismissing must not start the timer");
 	assert.equal(sd.text("time"), "0:05", "back to the time it was started with");
-	ok("press dismisses (on the way down) and restores 0:05; release is swallowed");
+	assert.equal(sd.strip.bg.enabled, false, "background hidden again after dismissing");
+	ok("press dismisses (on the way down) and restores 0:05; release is swallowed; background clear again");
 
 	sd.rotate(2);
 	await sd.waitFor(() => sd.text("time") === "0:15", "0:15");

@@ -1,6 +1,6 @@
 {
 	"name": "timer-dial",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"private": true,
 	"description": "A one-dial countdown timer for the Stream Deck+",
 	"type": "module",

@@ -6,7 +6,9 @@ import { formatElapsed, formatTime, remainingMs, type Scheme, SECOND, type Timer
  * reason about (and test): state in, plain object out.
  */
 export type StripView = {
-	bg: { background: string };
+	/** Full-strip colour panel. Hidden except during the alarm, so the user's own
+	 *  touch-strip background (set in the Stream Deck app) shows through. */
+	bg: { enabled: boolean; background: string };
 	status: { value: string; color: string };
 	time: { value: string; color: string };
 	hint: { value: string; color: string };
@@ -23,8 +25,9 @@ const COLOR = {
 	red: "#FF453A",
 	alarmBg: "#B3001B",
 	alarmBgDim: "#3D0009",
-	black: "#000000",
 };
+
+const HIDDEN_BG = { enabled: false, background: COLOR.alarmBg };
 
 export function view(s: TimerState, now: number, scheme: Scheme, soundOn: boolean): StripView {
 	const left = remainingMs(s, now);
@@ -38,7 +41,7 @@ export function view(s: TimerState, now: number, scheme: Scheme, soundOn: boolea
 	switch (s.status) {
 		case "idle":
 			return {
-				bg: { background: COLOR.black },
+				bg: HIDDEN_BG,
 				status: { value: "READY", color: COLOR.grey },
 				time: { value: formatTime(left), color: s.valueMs > 0 ? COLOR.white : COLOR.grey },
 				hint: {
@@ -53,7 +56,7 @@ export function view(s: TimerState, now: number, scheme: Scheme, soundOn: boolea
 			const ending = left <= 10 * SECOND || pct <= 10;
 			const accent = ending ? COLOR.orange : COLOR.green;
 			return {
-				bg: { background: COLOR.black },
+				bg: HIDDEN_BG,
 				status: { value: "RUNNING", color: accent },
 				time: { value: formatTime(left), color: COLOR.white },
 				hint: { value: scheme === "classic" ? `${add} · tap: pause` : "Turn ± · press to pause", color: COLOR.grey },
@@ -63,7 +66,7 @@ export function view(s: TimerState, now: number, scheme: Scheme, soundOn: boolea
 
 		case "paused":
 			return {
-				bg: { background: COLOR.black },
+				bg: HIDDEN_BG,
 				status: { value: "PAUSED", color: COLOR.amber },
 				time: { value: formatTime(left), color: COLOR.amber },
 				hint: { value: scheme === "classic" ? `${add} · tap: go` : "Press to resume · hold: reset", color: COLOR.grey },
@@ -72,11 +75,12 @@ export function view(s: TimerState, now: number, scheme: Scheme, soundOn: boolea
 
 		case "alarm": {
 			const over = now - s.firedAt;
-			// Flash twice a second while the sound plays, then settle on a steady
-			// dark red so a forgotten timer is obvious but not distracting.
+			// Flash twice a second while the sound plays (red panel on/off, with your
+			// background showing in the "off" beats), then settle on a steady dark
+			// red so a forgotten timer is obvious but not distracting.
 			const flashOn = soundOn && Math.floor(over / 500) % 2 === 0;
 			return {
-				bg: { background: soundOn ? (flashOn ? COLOR.alarmBg : COLOR.black) : COLOR.alarmBgDim },
+				bg: soundOn ? { enabled: flashOn, background: COLOR.alarmBg } : { enabled: true, background: COLOR.alarmBgDim },
 				status: { value: "TIME'S UP", color: soundOn && !flashOn ? COLOR.red : COLOR.white },
 				time: { value: "0:00", color: COLOR.white },
 				hint: { value: `+${formatElapsed(over)} · press to stop`, color: COLOR.white },

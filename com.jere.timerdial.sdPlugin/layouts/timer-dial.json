@@ -9,7 +9,8 @@
 			"rect": [0, 0, 200, 100],
 			"zOrder": 0,
 			"value": "",
-			"background": "#000000"
+			"background": "#B3001B",
+			"enabled": false
 		},
 		{
 			"key": "title",
